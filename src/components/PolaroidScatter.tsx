@@ -12,13 +12,13 @@ export function PolaroidScatter({ photos, captions = [] }: { photos: string[]; c
   ];
 
   return (
-    <div className="relative h-screen w-full flex items-center justify-center overflow-hidden">
+    <div className="relative h-screen w-full flex items-center justify-center overflow-visible">
       {photos.slice(0, 6).map((src, i) => {
         const pos = positions[i];
         return (
           <motion.div
             key={i}
-            className="absolute w-56 md:w-72 bg-white p-3 pb-12 shadow-soft"
+            className="absolute w-56 md:w-72 bg-white p-3 pb-12 shadow-soft pointer-events-auto"
             style={{ zIndex: pos.z }}
             initial={{ x: 0, y: 600, rotate: 0, opacity: 0, scale: 0.3 }}
             whileInView={{
@@ -28,7 +28,7 @@ export function PolaroidScatter({ photos, captions = [] }: { photos: string[]; c
               opacity: 1,
               scale: 1,
             }}
-            viewport={{ once: true, margin: "-100px" }}
+            viewport={{ once: true, margin: "-150px" }}
             transition={{
               duration: 1.1,
               delay: i * 0.15,

@@ -1,22 +1,26 @@
-import { motion, useScroll, useTransform, useMotionValueEvent } from "motion/react";
-import { useRef, useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
+import { useRef, useState, useEffect } from "react";
 
-/** Scroll-driven rapid photo swap. Looks beat-synced. */
+/** Auto-cycling photo reel. */
 export function PhotoFlicker({ photos, words }: { photos: string[]; words: string[] }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const idx = useTransform(scrollYProgress, [0, 1], [0, photos.length - 0.01]);
   const [i, setI] = useState(0);
-  useMotionValueEvent(idx, "change", (v) => setI(Math.floor(v)));
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setI((prev) => (prev + 1) % photos.length);
+    }, 2500); // Change photo every 2.5 seconds
+    return () => clearInterval(interval);
+  }, [photos.length]);
 
   return (
-    <section ref={ref} className="relative h-[300vh]">
-      <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative h-screen flex items-center justify-center overflow-hidden bg-background">
+      <AnimatePresence mode="wait">
         <motion.div
           key={i}
           initial={{ scale: 1.15, opacity: 0, filter: "blur(20px)" }}
           animate={{ scale: 1, opacity: 1, filter: "blur(0px)" }}
-          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          exit={{ scale: 0.85, opacity: 0, filter: "blur(20px)" }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           className="absolute inset-0"
         >
           <img src={photos[i % photos.length]} alt="" className="w-full h-full object-cover" />
@@ -26,14 +30,14 @@ export function PhotoFlicker({ photos, words }: { photos: string[]; words: strin
         {/* shutter lines */}
         <motion.div
           key={`top-${i}`}
-          className="absolute top-0 left-0 right-0 h-2 bg-primary origin-left"
+          className="absolute top-0 left-0 right-0 h-2 bg-primary origin-left z-20"
           initial={{ scaleX: 0 }}
           animate={{ scaleX: 1 }}
           transition={{ duration: 0.5 }}
         />
         <motion.div
           key={`bot-${i}`}
-          className="absolute bottom-0 left-0 right-0 h-2 bg-accent origin-right"
+          className="absolute bottom-0 left-0 right-0 h-2 bg-accent origin-right z-20"
           initial={{ scaleX: 0 }}
           animate={{ scaleX: 1 }}
           transition={{ duration: 0.5 }}
@@ -44,6 +48,7 @@ export function PhotoFlicker({ photos, words }: { photos: string[]; words: strin
           key={`w-${i}`}
           initial={{ y: 80, opacity: 0, filter: "blur(30px)" }}
           animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+          exit={{ y: -80, opacity: 0, filter: "blur(30px)" }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           className="relative z-10 font-display italic text-7xl md:text-[14rem] text-gradient leading-none mix-blend-difference text-center px-6"
         >
@@ -57,7 +62,7 @@ export function PhotoFlicker({ photos, words }: { photos: string[]; words: strin
         <div className="absolute top-6 right-6 font-mono text-xs tracking-widest text-foreground/60 z-20">
           ● REC
         </div>
-      </div>
+      </AnimatePresence>
     </section>
   );
 }

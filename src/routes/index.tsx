@@ -25,8 +25,29 @@ export const Route = createFileRoute("/")({
 
 function BirthdayPage() {
   const [intro, setIntro] = useState(true);
+  const [autoScrollEnabled, setAutoScrollEnabled] = useState(false);
   const { scrollYProgress } = useScroll();
   const progress = useSpring(scrollYProgress, { damping: 40, stiffness: 200 });
+
+  useEffect(() => {
+    if (intro || !autoScrollEnabled) return; // Don't auto-scroll during intro or if disabled
+
+    let animationId: number;
+    const autoScroll = () => {
+      window.scrollBy(0, 0.5); // Smooth slow scroll
+      animationId = requestAnimationFrame(autoScroll);
+    };
+
+    // Start auto-scroll after a short delay
+    const timeoutId = setTimeout(() => {
+      animationId = requestAnimationFrame(autoScroll);
+    }, 500);
+
+    return () => {
+      cancelAnimationFrame(animationId);
+      clearTimeout(timeoutId);
+    };
+  }, [intro, autoScrollEnabled]);
 
   return (
     <main className="relative bg-cosmic text-foreground overflow-x-hidden">
@@ -41,8 +62,16 @@ function BirthdayPage() {
       <div className="fixed top-4 left-6 z-[80] font-mono text-[10px] tracking-[0.3em] uppercase text-foreground/50 mix-blend-difference">
         ▸ rifa · the film
       </div>
-      <div className="fixed top-4 right-6 z-[80] font-mono text-[10px] tracking-[0.3em] uppercase text-foreground/50 mix-blend-difference">
-        01·06·2026
+      <div className="fixed top-4 right-6 z-[80] flex flex-col items-end gap-2">
+        <div className="font-mono text-[10px] tracking-[0.3em] uppercase text-foreground/50 mix-blend-difference">
+          01·06·2026
+        </div>
+        <button
+          onClick={() => setAutoScrollEnabled(!autoScrollEnabled)}
+          className="font-mono text-[10px] tracking-[0.2em] uppercase px-2 py-1 rounded border border-foreground/30 text-foreground/60 hover:text-foreground hover:border-foreground/60 transition-all"
+        >
+          {autoScrollEnabled ? "■ auto" : "▶ auto"}
+        </button>
       </div>
 
       <Particles density={70} />
@@ -55,11 +84,11 @@ function BirthdayPage() {
       <PolaroidAct />
       <PhotoFlicker
         photos={photos.slice(0, 8)}
-        words={["MUUUU", "MINE", "MUSE", "ONLY", "ALWAYS", "FOREVER", "RIFA", "MUUUU"]}
+        words={["MUUUU", "MINE", "QUEEN", "ONLY", "ALWAYS", "FOREVER", "RIFA", "MUUUU"]}
       />
       <CinemaScene />
       <LyricScene />
-      <HorizontalGallery photos={photos.slice(0, 7)} />
+      <HorizontalGallery photos={photos.slice(0, 7)} medium />
       <LetterScene />
       <Finale />
       <Credits />
@@ -124,8 +153,8 @@ function Hero() {
 function MarqueeBand() {
   return (
     <section className="relative py-12 border-y border-primary/20 bg-background/60 backdrop-blur">
-      <Marquee text="muuuu · happy birthday · rifa m r · 3 years · 01·06·2026 · my universe" speed={40} className="font-display italic text-5xl md:text-7xl text-gradient" />
-      <Marquee text="purple forever · hindu boy + muslim girl · tamil hearts · one road · one hug · forever" speed={50} reverse className="mt-4 font-mono text-xs tracking-[0.4em] uppercase text-foreground/40" />
+      <Marquee text="in your eyes, I found my home · my heart is yours · forever, muuuu" speed={40} className="font-display italic text-5xl md:text-7xl text-foreground drop-shadow-lg" />
+      <Marquee text="tamil hearts · one road · one hug · forever · my love · my life" speed={50} reverse className="mt-4 font-mono text-xs tracking-[0.4em] uppercase text-foreground/70" />
     </section>
   );
 }
@@ -152,10 +181,10 @@ function Verse1() {
           chapter · 01
         </motion.p>
         <h2 className="font-display italic text-5xl md:text-8xl text-gradient leading-[0.95]">
-          <SplitText text="three years" from="up" stagger={0.04} />
+          <SplitText text="when life gets hard" from="up" stagger={0.04} />
         </h2>
         <h2 className="font-display italic text-5xl md:text-8xl text-foreground/90 leading-[0.95] mt-2">
-          <SplitText text="one heartbeat." from="up" stagger={0.04} delay={0.3} />
+          <SplitText text="just flow." from="up" stagger={0.04} delay={0.3} />
         </h2>
         <motion.p
           initial={{ opacity: 0, y: 30 }}
@@ -164,7 +193,7 @@ function Verse1() {
           transition={{ duration: 1.2, delay: 0.8 }}
           className="mt-10 max-w-xl text-lg md:text-2xl text-foreground/70 leading-relaxed font-display italic"
         >
-          A Hindu boy. A Muslim girl. Both Tamil. And somewhere in the middle of all that noise — just <span className="text-gradient not-italic font-medium">muuuu</span> and me.
+          Go with the flow, make the right choices, and <span className="text-gradient not-italic font-medium">don't worry — mama is here.</span> Life is tough, but you're tougher. Trust the journey.
         </motion.p>
       </motion.div>
     </section>
@@ -183,7 +212,7 @@ function PolaroidAct() {
       </div>
       <PolaroidScatter
         photos={photos.slice(0, 6)}
-        captions={["first hello", "our song", "you laughing", "muuuu ♡", "that hug", "01.06"]}
+        captions={["forever in your eyes", "our love song", "beauty in your laugh", "heartbeats sync", "home is your arms", "always & forever"]}
       />
     </section>
   );
@@ -256,39 +285,61 @@ function CinemaScene() {
 function LetterScene() {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const rotate = useTransform(scrollYProgress, [0, 1], [-8, 8]);
   const y = useTransform(scrollYProgress, [0, 1], [80, -80]);
 
   return (
     <section ref={ref} className="relative py-40 px-6 overflow-hidden">
       <motion.img src={stardust} alt="" style={{ y }} className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-screen" loading="lazy" />
-      <motion.div
-        style={{ rotate }}
-        initial={{ opacity: 0, scale: 0.9 }}
-        whileInView={{ opacity: 1, scale: 1 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 1.4 }}
-        className="relative max-w-3xl mx-auto"
-      >
-        <div className="glass rounded-3xl p-10 md:p-16 shadow-glow">
-          <p className="font-mono text-[10px] tracking-[0.5em] text-primary uppercase mb-6">letter · no. 01</p>
-          <p className="font-script text-4xl text-accent mb-8">muuuu,</p>
-          <div className="space-y-6 font-display text-xl md:text-2xl leading-relaxed italic text-foreground/95">
-            <p>
-              <SplitText text="three years. " from="up" stagger={0.02} />
-              <SplitText text="three lifetimes inside them." from="up" stagger={0.02} delay={0.3} />
-            </p>
-            <p>
-              They drew lines. Religions. Roads. Whole cities of reasons we shouldn't.
-              You crossed all of them in one breath.
-            </p>
-            <p className="font-script text-3xl md:text-5xl text-gradient not-italic pt-4">
-              Kanmaniye… unnodu saran aagiren.
-            </p>
+      <div className="relative max-w-7xl mx-auto grid md:grid-cols-2 gap-8 md:gap-12 items-start">
+        {/* Rifa's Letter */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9, rotate: -6 }}
+          whileInView={{ opacity: 1, scale: 1, rotate: -3 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 1.4 }}
+          className="relative"
+        >
+          <div className="glass rounded-3xl p-8 md:p-12 shadow-glow">
+            <p className="font-mono text-[10px] tracking-[0.5em] text-primary uppercase mb-6">letter · from rifa</p>
+            <p className="font-script text-4xl text-accent mb-8">To Harisu,</p>
+            <div className="space-y-6 font-display text-lg md:text-xl leading-relaxed text-foreground/95">
+              <p>
+                I know I've hurt you. I'm truly sorry for that. But through your patience, you've helped me heal and I'm so grateful for that.
+              </p>
+              <p>
+                I promise I'll take care of you without doubts or fights. I LOVE YOU! You mean the world to me.
+              </p>
+              <p>
+                Thank you for your patience and for giving me the chance to make things right. I love you soooo much and I'll miss you badly! 🥺
+              </p>
+            </div>
+            <p className="mt-10 text-right font-script text-2xl text-accent">with all my love,<br />Rifa</p>
           </div>
-          <p className="mt-10 text-right font-script text-2xl text-accent">— forever yours</p>
-        </div>
-      </motion.div>
+        </motion.div>
+
+        {/* Your Reply */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9, rotate: 6 }}
+          whileInView={{ opacity: 1, scale: 1, rotate: 3 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 1.4, delay: 0.3 }}
+          className="relative mt-12 md:mt-24"
+        >
+          <div className="glass rounded-3xl p-8 md:p-12 shadow-glow">
+            <p className="font-mono text-[10px] tracking-[0.5em] text-primary uppercase mb-6">reply · from harisu</p>
+            <p className="font-script text-4xl text-accent mb-8">My Dearest Rifa,</p>
+            <div className="space-y-6 font-display text-lg md:text-xl leading-relaxed text-foreground/95">
+              <p>
+                You are my world, my love, my everything. Taking care of you is not a promise, but my life's greatest purpose.
+              </p>
+              <p>
+                I love you more than words can ever say. I'm always here, waiting for you.
+              </p>
+            </div>
+            <p className="mt-10 text-right font-script text-2xl text-accent">Forever yours,<br />Harisu</p>
+          </div>
+        </motion.div>
+      </div>
     </section>
   );
 }
@@ -316,7 +367,7 @@ function Finale() {
           />
         ))}
         <p className="font-script text-3xl text-accent mb-6">make a wish, muuuu</p>
-        <h2 className="font-display text-7xl md:text-[14rem] text-gradient leading-[0.85]">
+        <h2 className="font-display text-7xl md:text-[14rem] text-foreground leading-[0.85] drop-shadow-lg">
           <SplitText text="Happy" from="scale" stagger={0.08} />
           <br />
           <SplitText text="Birthday" from="scale" stagger={0.06} delay={0.5} />
@@ -349,21 +400,58 @@ function Finale() {
 /* ---------- CREDITS (scrolls like film credits) ---------- */
 function Credits() {
   return (
-    <section className="relative py-32 px-6 overflow-hidden border-t border-primary/20">
-      <Marquee text="directed by · the boy who waited at AGS cinemas" speed={35} className="font-display italic text-3xl md:text-5xl text-foreground/60" />
-      <div className="max-w-2xl mx-auto mt-20 text-center space-y-6 font-mono text-xs tracking-[0.3em] uppercase text-foreground/50">
-        <p>starring</p>
-        <p className="font-display italic text-4xl text-gradient normal-case tracking-normal">Rifa M R</p>
-        <div className="h-px w-32 mx-auto bg-primary/30" />
-        <p>soundtrack</p>
-        <p className="font-display italic text-xl text-foreground/80 normal-case tracking-normal">Kanmaniye — A.R. Rahman</p>
-        <div className="h-px w-32 mx-auto bg-primary/30" />
-        <p>love</p>
-        <p className="font-script text-3xl text-accent normal-case tracking-normal">3 years and counting</p>
+    <section className="relative py-40 px-6 overflow-hidden border-t border-primary/20 bg-gradient-to-b from-background via-background/80 to-primary/5">
+      <div className="max-w-3xl mx-auto space-y-24">
+        {/* Main Credits */}
+        <motion.div
+          className="text-center space-y-12"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1 }}
+        >
+          <div className="space-y-3">
+            <p className="font-mono text-xs tracking-[0.4em] uppercase text-foreground/50">presenting</p>
+            <h3 className="font-display text-6xl md:text-7xl text-gradient leading-[0.9]">
+              <SplitText text="RIFA" from="scale" stagger={0.15} />
+            </h3>
+          </div>
+          <div className="h-px w-32 mx-auto bg-gradient-to-r from-transparent via-primary to-transparent" />
+          <div className="space-y-4">
+            <p className="font-mono text-xs tracking-[0.3em] uppercase text-foreground/50">directed by passion</p>
+            <p className="font-display italic text-2xl text-foreground/70">the one who loves you infinitely</p>
+          </div>
+        </motion.div>
+
+        {/* Romantic Quote */}
+        <motion.div
+          className="text-center font-display italic text-2xl md:text-3xl text-foreground/80 leading-relaxed"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.4 }}
+        >
+          <p>
+            "I miss you more than words can say, my <span className="text-accent font-script not-italic">pondatti</span>.
+            <br />I promise to take care of you, always and forever."
+          </p>
+        </motion.div>
+
+        {/* Final Message */}
+        <motion.div
+          className="text-center space-y-6 pt-12 border-t border-primary/20"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.8 }}
+        >
+          <p className="font-script text-3xl md:text-4xl text-accent">Happy Birthday, Muuuu</p>
+          <p className="font-display italic text-foreground/70 text-lg">01.06.2026 · A birthday film celebrating you</p>
+          <p className="font-mono text-[10px] tracking-[0.3em] uppercase text-muted-foreground pt-8">
+            this film is my heart on screen · watch it whenever you miss me · i love you ♡
+          </p>
+        </motion.div>
       </div>
-      <p className="mt-24 text-center text-[10px] tracking-[0.4em] uppercase text-muted-foreground font-mono">
-        made with every heartbeat · 01·06·2026 · for muuuu
-      </p>
     </section>
   );
 }

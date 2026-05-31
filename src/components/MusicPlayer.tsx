@@ -22,7 +22,7 @@ export function MusicPlayer() {
 
   return (
     <>
-      <audio ref={audioRef} loop src="/music/kanmaniye.mp3" />
+      <audio ref={audioRef} loop src="/music/Kannae Kanmaniye.mp3" />
       {needsTap && (
         <motion.button
           initial={{ opacity: 0 }}
