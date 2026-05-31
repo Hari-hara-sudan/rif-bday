@@ -5,5 +5,5 @@ import { createVercelHandler } from "@tanstack/start/vercel-handler";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default createVercelHandler({
-  entry: path.resolve(__dirname, "../src/server"),
+  entry: path.resolve(__dirname, "../dist/server"),
 });

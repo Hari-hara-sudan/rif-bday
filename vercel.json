@@ -1,14 +1,16 @@
 {
+  "version": 2,
+  "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "functions": {
-    "api/index.ts": {
-      "includeFiles": "node_modules/@tanstack/start/**"
-    }
+  "devCommand": "npm run dev",
+  "env": {
+    "NODE_ENV": "production"
   },
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/api"
+  "functions": {
+    "api/[[...index]].ts": {
+      "runtime": "nodejs20.x",
+      "memory": 1024,
+      "maxDuration": 60
     }
-  ]
+  }
 }
